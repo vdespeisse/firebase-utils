@@ -1,4 +1,3 @@
-from firebase_utils import KEYS_PATH
 import json, os
 import firebase_admin
 from firebase_admin import db, auth
@@ -6,14 +5,15 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 
 class Connector(object):
-  def __init__(self, project):
+  def __init__(self, key_path, project=None):
     self.config_path = os.path.join(KEYS_PATH,project + '.json')
     self.config = json.load(open(self.config_path))
+    self.project = project if project else self.config['project_id'].split('-')[0]
     self.credentials = firebase_admin.credentials.Certificate(self.config_path)
     try:
       self.app = firebase_admin.initialize_app(self.credentials, {
           'databaseURL': 'https://' + self.config['project_id'] + '.firebaseio.com'
-      }, project)
+      }, self.project)
     except:
       self.app = firebase_admin.get_app(name=project)
 
